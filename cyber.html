@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberAlvino</title>
+    <link rel="stylesheet" href="cyber.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <h1>🔐 Cybercafé Manager</h1>
+            <p>Enter admin password to access full features</p>
+            <div class="password-wrapper">
+                <input type="password" id="loginPassword" placeholder="Admin Password" autocomplete="off" onkeypress="handleLoginEnter(event)">
+                <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">👁️</button>
+            </div>
+            <button onclick="login()" class="btn-primary">Login as Admin</button>
+            <button onclick="continueAsGuest()" class="btn-secondary">Continue as Guest</button>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="screen">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-brand">☕ Cybercafé</div>
+            <div class="nav-links">
+                <a href="#" onclick="showScreen('dashboard', this); return false;" class="nav-link active">Dashboard</a>
+                <a href="#" onclick="showScreen('wifiTimer', this); return false;" class="nav-link">WiFi Timer</a>
+                <a href="#" onclick="showScreen('addSale', this); return false;" class="nav-link">Add Sale</a>
+                <a href="#" onclick="showScreen('history', this); return false;" class="nav-link admin-only">History</a>
+                <a href="#" onclick="showScreen('settings', this); return false;" class="nav-link admin-only">Settings</a>
+                <button onclick="logout()" class="btn-logout">Logout</button>
+            </div>
+        </nav>
+
+        <!-- Dashboard Screen -->
+        <div id="dashboard" class="content-screen active">
+            <div class="container">
+                <h2>Dashboard</h2>
+                
+                <!-- Stats Cards (Admin Only) -->
+                <div class="stats-grid admin-only">
+                    <div class="stat-card">
+                        <div class="stat-label">Today's Revenue</div>
+                        <div class="stat-value" id="todayRevenue">0 MGA</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">This Week</div>
+                        <div class="stat-value" id="weekRevenue">0 MGA</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">This Month</div>
+                        <div class="stat-value" id="monthRevenue">0 MGA</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Sales</div>
+                        <div class="stat-value" id="totalSales">0</div>
+                    </div>
+                </div>
+
+                <!-- Guest Mode Message -->
+                <div class="guest-message" style="display: none;">
+                    <p>👤 Guest Mode - Sales tracking only. Login as admin to view revenue.</p>
+                </div>
+
+                <!-- Today's Sales -->
+                <div class="card">
+                    <h3>Today's Sales</h3>
+                    <div id="todaySalesList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WiFi Timer Screen -->
+        <div id="wifiTimer" class="content-screen">
+            <div class="container">
+                <div class="card" style="padding: 0; overflow: hidden; height: calc(100vh - 150px);">
+                    <iframe 
+                        src="wifi.html" 
+                        style="width: 100%; height: 100%; border: none;"
+                        title="WiFi Timer">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Sale Screen -->
+        <div id="addSale" class="content-screen">
+            <div class="container">
+                <h2>Add New Sale</h2>
+                <div class="card">
+                    <form id="saleForm" onsubmit="addSale(event)">
+                        <div class="form-group">
+                            <label>Sale Type</label>
+                            <select id="saleType" required onchange="updatePresetItems()">
+                                <option value="wifi">WiFi Session</option>
+                                <option value="cards">Orange/Yas Cards</option>
+                                <option value="media">Videos/Movies/Files</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Item/Description</label>
+                            <select id="salePreset" onchange="selectPreset()">
+                                <option value="">-- Quick Select --</option>
+                            </select>
+                            <input type="text" id="saleName" placeholder="Or type custom name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" id="saleQuantity" placeholder="1" value="1" required min="1" oninput="updateTotalPrice()">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Unit Price (MGA)</label>
+                            <input type="text" id="salePrice" placeholder="0 or 2000*2" required oninput="updateTotalPrice()">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Total Price</label>
+                            <div class="total-price-display" id="totalPriceDisplay">0 MGA</div>
+                        </div>
+
+                        <button type="submit" class="btn-primary">Add Sale</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Screen (Admin Only) -->
+        <div id="history" class="content-screen">
+            <div class="container">
+                <h2>Sales History</h2>
+                
+                <div class="card">
+                    <div class="filter-bar">
+                        <select id="filterPeriod" onchange="handlePeriodChange()">
+                            <option value="today">Today</option>
+                            <option value="yesterday">Yesterday</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="custom">Custom Date Range</option>
+                            <option value="all">All Time</option>
+                        </select>
+                        <select id="filterCategory" onchange="filterHistory()">
+                            <option value="all">All Categories</option>
+                            <option value="wifi">WiFi</option>
+                            <option value="cards">Cards</option>
+                            <option value="media">Media</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom Date Range -->
+                    <div id="customDateRange" class="custom-date-range" style="display: none;">
+                        <div class="date-inputs">
+                            <div class="date-input-group">
+                                <label>From:</label>
+                                <input type="date" id="dateFrom" onchange="filterHistory()">
+                            </div>
+                            <div class="date-input-group">
+                                <label>To:</label>
+                                <input type="date" id="dateTo" onchange="filterHistory()">
+                            </div>
+                        </div>
+                        <p class="date-hint">💡 Select start and end dates to view sales in that period</p>
+                    </div>
+
+                    <div id="historyList"></div>
+                    
+                    <div class="history-summary admin-only">
+                        <strong>Filtered Total: <span id="filteredTotal">0 MGA</span></strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Screen (Admin Only) -->
+        <div id="settings" class="content-screen">
+            <div class="container">
+                <h2>Settings</h2>
+
+                <!-- Change Password -->
+                <div class="card">
+                    <h3>Change Admin Password</h3>
+                    <form id="passwordForm" onsubmit="changePassword(event)">
+                        <div class="form-group">
+                            <input type="password" id="currentPassword" placeholder="Current Password" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="newPassword" placeholder="New Password" required minlength="4">
+                        </div>
+                        <button type="submit" class="btn-primary">Update Password</button>
+                    </form>
+                </div>
+
+                <!-- Preset Items -->
+                <div class="card">
+                    <h3>Manage Preset Items</h3>
+                    <div class="preset-section">
+                        <h4>WiFi Sessions</h4>
+                        <div id="wifiPresets"></div>
+                        <div class="add-preset">
+                            <input type="text" id="newWifiName" placeholder="Name (e.g., 1 Hour)">
+                            <input type="number" id="newWifiPrice" placeholder="Price" min="0">
+                            <button onclick="addPreset('wifi')" class="btn-small">Add</button>
+                        </div>
+                    </div>
+
+                    <div class="preset-section">
+                        <h4>Cards</h4>
+                        <div id="cardsPresets"></div>
+                        <div class="add-preset">
+                            <input type="text" id="newCardsName" placeholder="Name (e.g., Orange 1000)">
+                            <input type="number" id="newCardsPrice" placeholder="Price" min="0">
+                            <button onclick="addPreset('cards')" class="btn-small">Add</button>
+                        </div>
+                    </div>
+
+                    <div class="preset-section">
+                        <h4>Media</h4>
+                        <div id="mediaPresets"></div>
+                        <div class="add-preset">
+                            <input type="text" id="newMediaName" placeholder="Name (e.g., Movie Copy)">
+                            <input type="number" id="newMediaPrice" placeholder="Price" min="0">
+                            <button onclick="addPreset('media')" class="btn-small">Add</button>
+                        </div>
+                    </div>
+
+                    <div class="preset-section">
+                        <h4>Other</h4>
+                        <div id="otherPresets"></div>
+                        <div class="add-preset">
+                            <input type="text" id="newOtherName" placeholder="Name">
+                            <input type="number" id="newOtherPrice" placeholder="Price" min="0">
+                            <button onclick="addPreset('other')" class="btn-small">Add</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WiFi Timer Pricing -->
+                <div class="card">
+                    <h3>WiFi Timer Auto-Pricing</h3>
+                    <p style="color: #666; margin-bottom: 15px;">Set prices that will be automatically calculated when WiFi sessions end in the timer.</p>
+                    <div id="wifiPricingRates"></div>
+                    <div class="add-preset">
+                        <input type="number" id="newRateMinutes" placeholder="Minutes (e.g., 30)" min="1">
+                        <input type="number" id="newRatePrice" placeholder="Price (e.g., 1000)" min="0">
+                        <button onclick="addWifiRate()" class="btn-small">Add Rate</button>
+                    </div>
+                    <p style="color: #999; font-size: 12px; margin-top: 10px;">💡 Tip: Add multiple rates. The system will calculate prices proportionally.</p>
+                </div>
+
+                <!-- Export Data -->
+                <div class="card">
+                    <h3>Export Data</h3>
+                    <div class="export-buttons">
+                        <button onclick="exportToJSON()" class="btn-secondary">Export to JSON</button>
+                        <button onclick="exportToCSV()" class="btn-secondary">Export to CSV</button>
+                        <button onclick="clearAllData()" class="btn-danger">Clear All Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="cyber.js"></script>
+</body>
+</html>

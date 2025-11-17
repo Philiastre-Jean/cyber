@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiFi Time Tracker - Admin Panel</title>
+    <link rel="stylesheet" href="wifi.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌐 WiFi Time Tracker</h1>
+            <p class="subtitle">Admin Control Panel - Manage User Cards</p>
+        </header>
+
+        <div class="admin-controls">
+            <h3>Card Management:</h3>
+            <button class="btn-add-card" onclick="addNewCard()">
+                <span style="font-size: 20px;">➕</span>
+                Add New Card
+            </button>
+            <div class="card-count">
+                Total Cards: <span id="cardCount">0</span>
+            </div>
+        </div>
+
+        <div class="cards-grid" id="cardsContainer"></div>
+    </div>
+
+    <div class="modal" id="alertModal">
+        <div class="modal-content">
+            <h2>⏰ Time Expired!</h2>
+            <p id="modalMessage"></p>
+            <button class="modal-close" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+
+    <script src="wifi.js">
+        
+    </script>
+</body>
+</html>
