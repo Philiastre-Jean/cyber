@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberAlvino</title>
+    <title>Cyber Alvino</title>
     <link rel="stylesheet" href="cyber.css">
 </head>
 <body>
     <!-- Login Screen -->
     <div id="loginScreen" class="screen active">
         <div class="login-container">
-            <h1>🔐 Cybercafé Manager</h1>
+            <h1>🔐 Cyber Alvino</h1>
             <p>Enter admin password to access full features</p>
             <div class="password-wrapper">
                 <input type="password" id="loginPassword" placeholder="Admin Password" autocomplete="off" onkeypress="handleLoginEnter(event)">
@@ -30,6 +30,8 @@
                 <a href="#" onclick="showScreen('dashboard', this); return false;" class="nav-link active">Dashboard</a>
                 <a href="#" onclick="showScreen('wifiTimer', this); return false;" class="nav-link">WiFi Timer</a>
                 <a href="#" onclick="showScreen('addSale', this); return false;" class="nav-link">Add Sale</a>
+                <a href="#" onclick="showScreen('addExpense', this); return false;" class="nav-link">💸 Expenses</a>
+                <a href="#" onclick="showScreen('debts', this); return false;" class="nav-link">📋 Debts</a>
                 <a href="#" onclick="showScreen('history', this); return false;" class="nav-link admin-only">History</a>
                 <a href="#" onclick="showScreen('settings', this); return false;" class="nav-link admin-only">Settings</a>
                 <button onclick="logout()" class="btn-logout">Logout</button>
@@ -43,21 +45,40 @@
                 
                 <!-- Stats Cards (Admin Only) -->
                 <div class="stats-grid admin-only">
-                    <div class="stat-card">
-                        <div class="stat-label">Today's Revenue</div>
+                    <div class="stat-card income">
+                        <div class="stat-label">💰 Today's Income</div>
                         <div class="stat-value" id="todayRevenue">0 MGA</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-label">This Week</div>
-                        <div class="stat-value" id="weekRevenue">0 MGA</div>
+                    <div class="stat-card expense">
+                        <div class="stat-label">💸 Today's Expenses</div>
+                        <div class="stat-value" id="todayExpenses">0 MGA</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-label">This Month</div>
-                        <div class="stat-value" id="monthRevenue">0 MGA</div>
+                    <div class="stat-card profit">
+                        <div class="stat-label">📊 Today's Profit</div>
+                        <div class="stat-value" id="todayProfit">0 MGA</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Total Sales</div>
-                        <div class="stat-value" id="totalSales">0</div>
+                    <div class="stat-card debt">
+                        <div class="stat-label">📋 Total Debts Owed</div>
+                        <div class="stat-value" id="totalDebts">0 MGA</div>
+                    </div>
+                </div>
+
+                <!-- Monthly Summary -->
+                <div class="card admin-only">
+                    <h3>📈 Monthly Summary</h3>
+                    <div class="monthly-summary">
+                        <div class="summary-item">
+                            <span class="summary-label">Total Income:</span>
+                            <span class="summary-value income-text" id="monthIncome">0 MGA</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Total Expenses:</span>
+                            <span class="summary-value expense-text" id="monthExpenses">0 MGA</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Net Profit:</span>
+                            <span class="summary-value profit-text" id="monthProfit">0 MGA</span>
+                        </div>
                     </div>
                 </div>
 
@@ -90,7 +111,7 @@
         <!-- Add Sale Screen -->
         <div id="addSale" class="content-screen">
             <div class="container">
-                <h2>Add New Sale</h2>
+                <h2>💰 Add New Sale (Money IN)</h2>
                 <div class="card">
                     <form id="saleForm" onsubmit="addSale(event)">
                         <div class="form-group">
@@ -123,11 +144,101 @@
 
                         <div class="form-group">
                             <label>Total Price</label>
-                            <div class="total-price-display" id="totalPriceDisplay">0 MGA</div>
+                            <div class="total-price-display income-bg" id="totalPriceDisplay">0 MGA</div>
                         </div>
 
-                        <button type="submit" class="btn-primary">Add Sale</button>
+                        <button type="submit" class="btn-primary btn-income">💰 Add Sale (Money IN)</button>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Expense Screen -->
+        <div id="addExpense" class="content-screen">
+            <div class="container">
+                <h2>💸 Add Expense (Money OUT)</h2>
+                <div class="card">
+                    <form id="expenseForm" onsubmit="addExpense(event)">
+                        <div class="form-group">
+                            <label>Expense Category</label>
+                            <select id="expenseType" required>
+                                <option value="salary">💼 Salary Payment</option>
+                                <option value="supplies">📦 Supplies/Products</option>
+                                <option value="bills">🔌 Bills (Electric, Internet)</option>
+                                <option value="rent">🏠 Rent</option>
+                                <option value="maintenance">🔧 Maintenance/Repairs</option>
+                                <option value="other_expense">📝 Other Expense</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" id="expenseName" placeholder="e.g., John's salary, Electric bill" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Amount (MGA)</label>
+                            <input type="text" id="expenseAmount" placeholder="0" required oninput="updateExpenseDisplay()">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Total Amount</label>
+                            <div class="total-price-display expense-bg" id="expenseDisplay">0 MGA</div>
+                        </div>
+
+                        <button type="submit" class="btn-primary btn-expense">💸 Add Expense (Money OUT)</button>
+                    </form>
+                </div>
+
+                <!-- Recent Expenses -->
+                <div class="card">
+                    <h3>Recent Expenses</h3>
+                    <div id="recentExpenses"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Debts Management Screen -->
+        <div id="debts" class="content-screen">
+            <div class="container">
+                <h2>📋 Debt Management</h2>
+                
+                <!-- Add New Debt -->
+                <div class="card">
+                    <h3>➕ Add New Debt</h3>
+                    <form id="debtForm" onsubmit="addDebt(event)">
+                        <div class="form-group">
+                            <label>Person's Name</label>
+                            <input type="text" id="debtPerson" placeholder="Who owes money?" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Amount Owed (MGA)</label>
+                            <input type="number" id="debtAmount" placeholder="0" required min="1">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Reason/Note</label>
+                            <input type="text" id="debtReason" placeholder="What for?">
+                        </div>
+
+                        <button type="submit" class="btn-primary btn-debt">📋 Add Debt</button>
+                    </form>
+                </div>
+
+                <!-- Active Debts -->
+                <div class="card">
+                    <h3>📋 Active Debts (People Who Owe You)</h3>
+                    <div id="activeDebts"></div>
+                    <div class="debt-total">
+                        <strong>Total Owed to You: <span id="totalDebtAmount">0 MGA</span></strong>
+                    </div>
+                </div>
+
+                <!-- Paid Debts History -->
+                <div class="card">
+                    <h3>✅ Paid Debts History</h3>
+                    <div id="paidDebts"></div>
                 </div>
             </div>
         </div>
@@ -154,6 +265,11 @@
                             <option value="media">Media</option>
                             <option value="other">Other</option>
                         </select>
+                        <select id="filterType" onchange="filterHistory()">
+                            <option value="all">💰💸 All Transactions</option>
+                            <option value="income">💰 Income Only</option>
+                            <option value="expense">💸 Expenses Only</option>
+                        </select>
                     </div>
 
                     <!-- Custom Date Range -->
@@ -174,7 +290,11 @@
                     <div id="historyList"></div>
                     
                     <div class="history-summary admin-only">
-                        <strong>Filtered Total: <span id="filteredTotal">0 MGA</span></strong>
+                        <div class="history-totals">
+                            <span class="income-text">💰 Income: <strong id="filteredIncome">0 MGA</strong></span>
+                            <span class="expense-text">💸 Expenses: <strong id="filteredExpenses">0 MGA</strong></span>
+                            <span class="profit-text">📊 Net: <strong id="filteredTotal">0 MGA</strong></span>
+                        </div>
                     </div>
                 </div>
             </div>
